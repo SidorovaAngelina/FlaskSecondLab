@@ -1,7 +1,8 @@
-from app import app
-from flask import request, render_template
-from flask import make_response
-import random
+from my_app import app
+from flask import render_template, redirect, url_for, session
+
+
+from my_app.forms import SimpleForm
 
 
 @app.route('/')
@@ -38,3 +39,19 @@ def show_about():
 @app.errorhandler(404)
 def forbidden(e):
     return render_template('404.html'), 404
+
+
+@app.route('/form', methods=['GET', 'POST'])
+def testForm():
+    form = SimpleForm()
+    if form.validate_on_submit():
+        session['email'] = form.email.data
+        return redirect(url_for('show_data'))
+    return render_template('formTemplate.html', form=form)
+
+
+@app.route('/show_data')
+def show_data():
+    email = session.get('email')
+    return render_template('shownData.html', email=email)
+
