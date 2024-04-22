@@ -1,5 +1,7 @@
-from my_app import app
-from flask import render_template, redirect, url_for, session
+from my_app import app, db
+from flask import render_template, redirect, url_for, session, flash
+from sqlalchemy.exc import IntegrityError
+from models import User
 
 
 from my_app.forms import SimpleForm
@@ -45,13 +47,32 @@ def forbidden(e):
 def testForm():
     form = SimpleForm()
     if form.validate_on_submit():
-        session['email'] = form.email.data
-        return redirect(url_for('show_data'))
+        try:
+            new_user = User(email=form.email.data, username=form.username.data, password=form.password.data,
+                            gender=form.gender.data)
+            db.session.add(new_user)
+            db.session.commit()
+            session['user_id'] = new_user.id
+            session['username'] = new_user.username
+            session['email'] = form.email.data
+            session['gender'] = form.gender.data
+            return redirect(url_for('show_data'))
+        except IntegrityError as e:
+            if "key 'email'" in str(e):
+                flash('Аккаунт с данной почтой уже существует.', 'email_error')
+            elif "key 'username'" in str(e):
+                flash('Пользователь с таким логином уже существует', 'username_error')
+            db.session.rollback()
+            return redirect(url_for('testForm'))
+
     return render_template('formTemplate.html', form=form)
 
 
 @app.route('/show_data')
 def show_data():
+    user_id = session.get('user_id')
+    username = session.get('username')
     email = session.get('email')
-    return render_template('shownData.html', email=email)
+    gender = session.get('gender')
+    return render_template('shownData.html', user_id=user_id, username=username, email=email, gender=gender)
 

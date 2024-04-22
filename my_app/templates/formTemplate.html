@@ -21,6 +21,32 @@
                         {% endfor %}
                     </ul>
                 {% endif %}
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <ul class=flashes>
+                                {% for category, message in messages %}
+                                    {% if category == 'email_error' %}
+                                        <li class="error">{{ message }}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                {% endwith %}
+            </div>
+
+            <div class="input-box">
+                {{ form.username(placeholder=form.username.label.text) }}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class=flashes>
+                            {% for category, message in messages %}
+                                {% if category == 'username_error' %}
+                                    <li class="error">{{ message }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
             </div>
 
             <div class="input-box">
