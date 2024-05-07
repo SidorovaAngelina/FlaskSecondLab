@@ -1,8 +1,7 @@
 import os
+from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-
-
 
 from flask import Flask
 #from flask_bootstrap import Bootstrap
@@ -16,6 +15,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 #bootstrap = Bootstrap(my_app)
 
 db = SQLAlchemy(app)
+
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+
+mail = Mail(app)
 
 from models import *
 migrate = Migrate(app, db)

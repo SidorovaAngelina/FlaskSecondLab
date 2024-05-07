@@ -1,8 +1,10 @@
 from my_app import app, db
-from flask import render_template, redirect, url_for, session, flash
+from flask import render_template, request, redirect, url_for, session, flash
+from flask_mail import Message
 from sqlalchemy.exc import IntegrityError
 from models import User
 
+from . import mail
 
 from my_app.forms import SimpleForm
 
@@ -37,10 +39,17 @@ def show_about():
            f'<p>Мы используем только высококачественные ингредиенты, чтобы гарантировать вам наилучший вкус и качество наших напитков.</p>'
 
 
-
 @app.errorhandler(404)
 def forbidden(e):
     return render_template('404.html'), 404
+
+
+def send_mail(to, subject, template, kwargs):
+    msg = Message(subject,
+                  sender=app.config['MAIL_USERNAME'],
+                  recipients=[to])
+    msg.html = render_template(template + ".html", **kwargs)
+    mail.send(msg)
 
 
 @app.route('/form', methods=['GET', 'POST'])
@@ -56,6 +65,8 @@ def testForm():
             session['username'] = new_user.username
             session['email'] = form.email.data
             session['gender'] = form.gender.data
+            email = request.form['email']
+            send_mail(email, "Добро пожаловать!", "welcome_email", {'username': new_user.username})
             return redirect(url_for('show_data'))
         except IntegrityError as e:
             if "key 'email'" in str(e):
