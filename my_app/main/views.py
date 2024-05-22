@@ -1,11 +1,9 @@
-from flask import render_template, request, redirect, url_for, session, flash
+from flask import render_template, request, redirect, url_for, session, flash, current_app
 from flask_mail import Message
-from sqlalchemy.exc import IntegrityError
+from flask_login import login_required
 
 from . import main
-from .. import mail, db
-from my_app.main.forms import SimpleForm
-from my_app.models import User
+from .. import mail
 
 
 @main.route('/')
@@ -40,37 +38,10 @@ def show_about():
 
 def send_mail(to, subject, template, kwargs):
     msg = Message(subject,
-                  sender=main.config['MAIL_USERNAME'],
+                  sender=current_app.config['MAIL_USERNAME'],
                   recipients=[to])
     msg.html = render_template(template + ".html", **kwargs)
     mail.send(msg)
-
-
-@main.route('/form', methods=['GET', 'POST'])
-def testForm():
-    form = SimpleForm()
-    if form.validate_on_submit():
-        try:
-            new_user = User(email=form.email.data, username=form.username.data, password=form.password.data,
-                            gender=form.gender.data)
-            db.session.add(new_user)
-            db.session.commit()
-            session['user_id'] = new_user.id
-            session['username'] = new_user.username
-            session['email'] = form.email.data
-            session['gender'] = form.gender.data
-            email = request.form['email']
-            send_mail(email, "Добро пожаловать!", "welcome_email", {'username': new_user.username})
-            return redirect(url_for('show_data'))
-        except IntegrityError as e:
-            if "key 'email'" in str(e):
-                flash('Аккаунт с данной почтой уже существует.', 'email_error')
-            elif "key 'username'" in str(e):
-                flash('Пользователь с таким логином уже существует', 'username_error')
-            db.session.rollback()
-            return redirect(url_for('testForm'))
-
-    return render_template('formTemplate.html', form=form)
 
 
 @main.route('/show_data')
@@ -80,3 +51,9 @@ def show_data():
     email = session.get('email')
     gender = session.get('gender')
     return render_template('shownData.html', user_id=user_id, username=username, email=email, gender=gender)
+
+
+@main.route('/secret')
+@login_required
+def secret():
+    return 'only for auth'

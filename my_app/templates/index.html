@@ -3,6 +3,23 @@
 {% block title %}Домашняя страница{% endblock %}
 
 {% block  content %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+             <ul class="flashes">
+                {% for message in messages %}
+                 <div class="message_flash">{{ message }}</div>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
     <h3><i>Пока что здесь ничего нет, но скоро обязательно будет. Хорошего дня!</i></h3>
-
+    <script>
+    $(function() { // setTimeout() function will be fired after page is loaded
+// it will wait for 5 sec. and then will fire
+// $(".message_flash").hide() function
+        setTimeout(function() {
+            $(".message_flash").hide('blind', {}, 500)
+        }, 5000);
+    });
+    </script>
 {%endblock %}
