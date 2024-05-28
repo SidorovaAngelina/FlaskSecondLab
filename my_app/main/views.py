@@ -1,9 +1,9 @@
 from flask import render_template, request, redirect, url_for, session, flash, current_app
+from my_app.models import User
 from flask_mail import Message
 from flask_login import login_required
 
 from . import main
-from .. import mail
 
 
 @main.route('/')
@@ -35,13 +35,14 @@ def show_about():
     return f'<h1>О нас</h1>' \
            f'<p>Мы используем только высококачественные ингредиенты, чтобы гарантировать вам наилучший вкус и качество наших напитков.</p>'
 
-
+'''
 def send_mail(to, subject, template, kwargs):
     msg = Message(subject,
                   sender=current_app.config['MAIL_USERNAME'],
                   recipients=[to])
     msg.html = render_template(template + ".html", **kwargs)
     mail.send(msg)
+'''
 
 
 @main.route('/show_data')
@@ -57,3 +58,11 @@ def show_data():
 @login_required
 def secret():
     return 'only for auth'
+
+
+@main.route('/testConfirm')
+def testConfirm():
+    user = User.query.filter_by().first()
+    tmp = user.generate_confirmation_token()
+    user.confirm(tmp)
+

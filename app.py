@@ -4,10 +4,8 @@ import unittest
 from my_app.models import *
 from my_app import create_app, db
 
-from flask_migrate import Migrate
 
 flask_app = create_app('default')
-migrate = Migrate(flask_app, db)
 
 
 @flask_app.cli.command('test')
