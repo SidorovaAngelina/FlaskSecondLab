@@ -15,8 +15,8 @@ class UserModelTestCase(unittest.TestCase):
             user.password
 
     def test_password_verification(self):
-        user = User(email='test@sample.com', password='almond')
-        user.set_password = 'almond'
+        user = User(email='test@sample.com')
+        user.set_password('almond')
         self.assertTrue(user.password_verification('almond'))
         self.assertFalse(user.password_verification('pistachio'))
 
@@ -29,7 +29,8 @@ class UserModelTestCase(unittest.TestCase):
 
     def test_user_role(self):
         Role.insert_roles()
-        user = User(email='test@sample.com', password='nut')
+        user = User(email='test@sample.com')
+        user.set_password('nut')
         self.assertTrue(user.can(Permission.FOLLOW))
         self.assertTrue(user.can(Permission.COMMENT))
         self.assertTrue(user.can(Permission.WRITE))
@@ -44,4 +45,3 @@ class UserModelTestCase(unittest.TestCase):
         self.assertFalse(user.can(Permission.WRITE))
         self.assertFalse(user.can(Permission.MODERATE))
         self.assertFalse(user.can(Permission.ADMIN))
-

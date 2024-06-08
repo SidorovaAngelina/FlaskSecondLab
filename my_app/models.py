@@ -1,8 +1,9 @@
 from flask_login import UserMixin, AnonymousUserMixin
-from . import db, login_manager
+from . import db, admin, login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
 from authlib.jose import jwt
 from authlib.jose import JsonWebSignature
+from flask_admin.contrib.sqla import ModelView
 
 
 class Permission:
@@ -64,22 +65,8 @@ class Role(db.Model):
         self.permissions = 0
 
 
-class Song(db.Model):
-    __tablename__ = 'songs'
-
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    artist = db.Column(db.String(100), nullable=False)
-    country = db.Column(db.String(100), nullable=False)
-    genre = (db.String(100))
-    users = db.relationship('User', backref='fav_playlist')
-
-    def __repr__(self):
-        return '<Song %r>' % self.name
-
-
 class User(UserMixin, db.Model):
-    __tablename__ = 'user'
+    __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -87,18 +74,15 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     gender = db.Column(db.String(10), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    song_id = db.Column(db.Integer, db.ForeignKey('songs.id'))
     confirmed = db.Column(db.Boolean, default=False)
-    name = db.Column(db.String(100))
-    about_me = db.Column(db.Text())
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role_id is None:
-            if self.email == 'testlina@mail.ru':
-                self.role_id = Role.query.filter_by(name='Administrator').first()
+            if self.email == 'testlinaan@mail.ru':
+                self.role_id = Role.query.filter_by(name='Administrator').first().id
             if self.role_id is None:
-                self.role_id = Role.query.filter_by(default=True).first()
+                self.role_id = Role.query.filter_by(default=1).first().id
 
     def generate_confirmation_token(self):
         header = {'alg': 'HS256'}
@@ -108,7 +92,10 @@ class User(UserMixin, db.Model):
         return token.decode('utf-8')
 
     def can(self, perm):
-        return self.role_id is not None and self.role_id.has_permission(perm)
+        role = Role.query.get(self.role_id)
+        if role is None:
+            return False
+        return role.has_permission(perm)
 
     def is_admin(self):
         return self.can(Permission.ADMIN)
@@ -132,8 +119,8 @@ class User(UserMixin, db.Model):
         raise AttributeError('password not enable to read')
 
     @password.setter
-    def password(self, password):
-        self.password_hash = generate_password_hash(password)
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password,  method='pbkdf2:sha256')
 
     def password_verification(self, password):
         return check_password_hash(self.password_hash, password)
@@ -156,3 +143,5 @@ def load_user(user_id):
 
 
 login_manager.anonymous_user = AnonymousUser
+
+admin.add_view(ModelView(User, db.session))

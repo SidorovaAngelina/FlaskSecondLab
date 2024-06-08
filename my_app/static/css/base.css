@@ -1,0 +1,30 @@
+body {
+    font-family: 'Oswald', sans-serif;
+}
+.text-blue {
+  color: #413897
+}
+.custom-navbar-color{
+    background-color: #C8C2D6;
+}
+.message_flash {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    animation: fadeout 5s forwards;
+}
+
+@keyframes fadeout {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}

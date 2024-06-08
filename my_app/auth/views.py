@@ -1,5 +1,9 @@
-from flask import render_template, redirect, url_for, flash, request, session
-from flask_login import login_user, logout_user, login_required, current_user
+from flask import (
+    render_template, redirect, url_for, flash, request, session
+)
+from flask_login import (
+    login_user, logout_user, login_required, current_user
+)
 from sqlalchemy.exc import IntegrityError
 from flask_mail import Message
 from threading import Thread
@@ -13,41 +17,47 @@ from .. import mail
 
 @auth.before_app_request
 def before_request():
-    if current_user.is_authenticated and not current_user.confirmed and request.blueprint != 'auth' \
-            and request.endpoint != 'static':
-        return redirect(url_for('auth.unconfirmed'))
+    """
+    Проверка подтверждения аккаунта перед каждым запросом.
+    """
+    if current_user.is_authenticated and not current_user.confirmed:
+        if request.blueprint != 'auth' and request.endpoint != 'static':
+            return redirect(url_for('auth.unconfirmed'))
 
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        print(f"Email: {email}, Password: {password}")
         user = User.query.filter_by(email=form.email.data).first()
+        print(f"User found: {user}")
         if user is not None and user.password_verification(form.password.data):
+            print("Password verification successful")
             login_user(user)
-            session['user_id'] = user.id
-            session['username'] = user.username
-            session['email'] = user.email
-            session['gender'] = user.gender
-            next_page = request.args.get("next")
-            if next_page is None or not next_page.startswith('/'):
-                next_page = url_for('main.index')
-            return redirect(next_page)
-        else:
-            flash('Неверный логин или пароль', 'error')
+            db.session.commit()
+            flash('Вы успешно авторизовались!')
+            return redirect(url_for('main.index', endpoint='main.index'))
+        flash('Неверный логин или пароль', 'error')
     return render_template("login.html", form=form)
 
 
 @auth.route('/registration', methods=['GET', 'POST'])
 def registration():
+    """
+    Страница регистрации
+    """
     form = RegistrationForm()
     if form.validate_on_submit():
         try:
-            print(User)
-            print(form.email.data, form.username.data, form.password.data, form.gender.data)
-            new_user = User(email=form.email.data, username=form.username.data, password=form.password.data,
-                            gender=form.gender.data)
-            print(new_user.email, new_user.id, new_user.password_hash)
+            new_user = User(
+                email=form.email.data,
+                username=form.username.data,
+                password=form.password.data,
+                gender=form.gender.data
+            )
             db.session.add(new_user)
             db.session.commit()
             session['user_id'] = new_user.id
@@ -56,8 +66,6 @@ def registration():
             session['gender'] = form.gender.data
             token = new_user.generate_confirmation_token()
             send_confirm(new_user, token)
-#           email = request.form['email']
-#           send_mail(email, 'Добро пожаловать!', 'welcome_email', {'username': new_user.username})
             login_user(new_user)
             return redirect(url_for('main.index'))
         except IntegrityError as e:
@@ -73,6 +81,9 @@ def registration():
 @auth.route('/logout')
 @login_required
 def logout():
+    """
+    Выход из аккаунта.
+    """
     logout_user()
     flash('Вы вышли из аккаунта.')
     return redirect(url_for('main.index'))
@@ -81,11 +92,16 @@ def logout():
 @auth.route('/confirm/<token>')
 @login_required
 def confirm(token):
+    """
+    Подтверждение аккаунта
+    Параметр token: токен подтверждения
+    """
     if current_user.confirmed:
         return redirect(url_for('main.index'))
     if current_user.confirm(token.encode('utf-8')):
         db.session.commit()
         flash('Ваше подтверждение прошло успешно, спасибо!')
+        send_mail(current_user.email, 'Welcome to the team', 'welcome_email', user=current_user)
     else:
         flash('Ваша ссылка не валидна или истекла')
     return redirect(url_for('main.index'))
@@ -93,17 +109,32 @@ def confirm(token):
 
 @auth.route('/unconfirmed')
 def unconfirmed():
+    """
+    Для не подтвержденных аккаунтов.
+    """
     if current_user.is_anonymous or current_user.confirmed:
         return redirect(url_for('main.index'))
     return render_template('unconfirmed.html')
 
 
 def send_confirm(new_user, token):
+    """
+    Отправка письма с подтверждением аккаунта.
+    :param new_user: новый пользователь
+    :param token: токен подтверждения
+    """
     send_mail(new_user.email, 'Confirm your account', 'confirm', new_user=new_user, token=token)
-    redirect(url_for('main.index'))
+    return redirect(url_for('main.index'))
 
 
 def send_mail(to, subject, template, **kwargs):
+    """
+    Отправка электронного письма.
+    :param to: адрес получателя
+    :param subject: тема письма
+    :param template: шаблон письма
+    :param kwargs: дополнительные параметры
+    """
     msg = Message(subject,
                   sender='testkaze01@gmail.com',
                   recipients=[to])
@@ -115,9 +146,14 @@ def send_mail(to, subject, template, **kwargs):
     thread = Thread(target=send_async_email, args=[flask_app, msg])
     thread.start()
     return thread
-#   mail.send(msg)
+    mail.send(msg)
 
 
 def send_async_email(app, msg):
+    """
+    Отправка электронного письма асинхронно
+    :param app: приложение Flask
+    :param msg: объект Message
+    """
     with app.app_context():
         mail.send(msg)

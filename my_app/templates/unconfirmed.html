@@ -1,10 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
+    <title>Неподтвержденный адрес электронной почты</title>
 </head>
 <body>
-<h1>Unconfirmed!</h1>
+    <h1 style="display:flex; justify-content: center; margin-top: 20px; color: #CB3852; font-size: 36px;">Неподтвержденный адрес электронной почты</h1>
+    <p style="font-size: 20px;">Спасибо Вам за регистрацию на нашем сайте!</p>
+    <p style="font-size: 20px;">Однако необходимо подтвердить ваш адрес электронной почты,
+        прежде чем вы сможете получить доступ к информации на сайте.</p>
+    <p style="font-size: 20px;">Мы отправили электронное письмо с подтверждением по адресу <strong>{{ current_user.email }}</strong>.
+        Пожалуйста, перейдите по ссылке в электронном письме, чтобы активировать свою учетную запись.</p>
+    <p style="font-size: 20px;">Если вы не получили это письмо, пожалуйста, проверьте в папке со спамом.</p>
 </body>
 </html>

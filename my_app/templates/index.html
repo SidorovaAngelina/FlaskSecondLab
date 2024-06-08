@@ -12,8 +12,21 @@
             </ul>
         {% endif %}
     {% endwith %}
-    <h3><i>Пока что здесь ничего нет, но скоро обязательно будет. Хорошего дня!</i></h3>
-    <script>
+
+    {% if current_user.is_authenticated %}
+        <h3 style="padding-left: 15px;">Новости</h3>
+        <div class="article-list">
+            {% for article in article_list %}
+                <div class="article-card">
+                    <h4>{{ article.title }}</h4>
+                    <p>{{ article.text|truncate(100) }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+    <h3 style="padding-left: 15px;">Зарегистрируйтесь, чтобы просматривать содержимое сайта. Хорошего Вам дня!</h3>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
     $(function() { // setTimeout() function will be fired after page is loaded
 // it will wait for 5 sec. and then will fire
 // $(".message_flash").hide() function
@@ -22,4 +35,5 @@
         }, 5000);
     });
     </script>
-{%endblock %}
+  {% endif %}
+{% endblock %}

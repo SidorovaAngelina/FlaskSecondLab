@@ -1,17 +1,15 @@
-@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
-
 *{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Oswald', sans-serif;
 }
 body{
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #d0f0c0;
+  background: #C8C2D6;
 }
 .wrapper{
   position: relative;
@@ -24,20 +22,13 @@ body{
 }
 .wrapper h2{
   position: relative;
-  font-size: 22px;
+  font-size: 36px;
   font-weight: 600;
   color: #333;
+  text-align: center;
+  margin: 0 auto;
 }
-.wrapper h2::before{
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 3px;
-  width: 28px;
-  border-radius: 12px;
-  background: #ccffcc;
-}
+
 .wrapper form{
   margin-top: 30px;
 }
