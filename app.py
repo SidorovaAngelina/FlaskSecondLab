@@ -1,7 +1,6 @@
 import os
 import unittest
 
-from my_app.models import *
 from my_app import create_app, db
 
 

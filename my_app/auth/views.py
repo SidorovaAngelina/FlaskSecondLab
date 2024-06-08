@@ -37,10 +37,11 @@ def login():
         if user is not None and user.password_verification(form.password.data):
             print("Password verification successful")
             login_user(user)
-            db.session.commit()
-            flash('Вы успешно авторизовались!')
-            return redirect(url_for('main.index', endpoint='main.index'))
-        flash('Неверный логин или пароль', 'error')
+            next = request.args.get("next")
+            if next is None or not next.startswith("/"):
+                next = url_for('main.index')
+                return redirect(next)
+            flash('Неверный логин или пароль', 'error')
     return render_template("login.html", form=form)
 
 
@@ -55,15 +56,11 @@ def registration():
             new_user = User(
                 email=form.email.data,
                 username=form.username.data,
-                password=form.password.data,
                 gender=form.gender.data
             )
             db.session.add(new_user)
+            new_user.set_password(form.password.data)
             db.session.commit()
-            session['user_id'] = new_user.id
-            session['username'] = form.username.data
-            session['email'] = form.email.data
-            session['gender'] = form.gender.data
             token = new_user.generate_confirmation_token()
             send_confirm(new_user, token)
             login_user(new_user)
@@ -100,11 +97,12 @@ def confirm(token):
         return redirect(url_for('main.index'))
     if current_user.confirm(token.encode('utf-8')):
         db.session.commit()
-        flash('Ваше подтверждение прошло успешно, спасибо!')
+        flash('Ваше подтверждение прошло успешно, спасибо! Прислали вам письмо на почту.')
         send_mail(current_user.email, 'Welcome to the team', 'welcome_email', user=current_user)
     else:
         flash('Ваша ссылка не валидна или истекла')
     return redirect(url_for('main.index'))
+
 
 
 @auth.route('/unconfirmed')
