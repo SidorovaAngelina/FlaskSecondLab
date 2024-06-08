@@ -1,12 +1,14 @@
 import os
 from flask import (
-    render_template, request, redirect, url_for, session, flash, current_app
+    render_template, redirect, url_for, session, flash
 )
+from werkzeug.utils import secure_filename
+from flask import current_app
 from my_app.models import User, Permission, Articles
+from .forms import ProfileForm, ArticlesForm
+from .. import db
 from ..decorators import admin_required, permission_required
-from flask_mail import Message
-from flask_login import login_required
-
+from flask_login import login_required, current_user
 from .import main
 
 
@@ -16,18 +18,16 @@ def index():
     """
     Отображает главную страницу приложения.
     """
-    return render_template("index.html")
+    articles = Articles.query.all()
+    return render_template('index.html', articles=articles)
 
 
 @main.route("/about-us")
 def show_about():
+    """
+    Отображает информацию о нас.
+    """
     return render_template("about_us.html")
-
-
-@main.route("/new_releases")
-@login_required
-def releases():
-    return render_template("new_releases.html")
 
 
 @main.route('/show_data')
@@ -83,7 +83,7 @@ def testConfirm():
     user.confirm(tmp)
 
 
-@main.route('/user/<username>')
+@main.route('/user/<username>', methods=['GET', 'POST'])
 def user(username):
     """
     Страница профиля пользователя.
@@ -91,18 +91,26 @@ def user(username):
     return: HTML-страница с информацией о пользователе
     """
     user = User.query.filter_by(username=username).first_or_404()
-    return render_template('profile.html', user=user)
+    form = ProfileForm(obj=user)
+    if form.validate_on_submit():
+        user.username = form.username.data
+        db.session.commit()
+        flash('Данные обновлены успешно!')
+        return redirect(url_for('main.index', username=user.username))
+    return render_template('profile.html', user=user, form=form)
 
-'''
-@main.route('/profile')
-@login_required
-def profile():
-    return render_template('profile.html')
-'''
 
-
-@main.route('/articles')
-def articles():
-    articles = Articles.query.all()
-    return render_template('articles.html', articles=articles)
-
+@main.route('/create_article', methods=['GET', 'POST'])
+@admin_required
+def create_article():
+    form = ArticlesForm()
+    if form.validate_on_submit():
+        photo = form.photo.data
+        filename = secure_filename(photo.filename)
+        photo.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+        article = Articles(title=form.title.data, description=form.description.data, photo=filename, current_user_id=current_user.id)
+        db.session.add(article)
+        db.session.commit()
+        flash('Статья создана успешно!')
+        return redirect(url_for('main.index'))
+    return render_template('create_article.html', form=form)

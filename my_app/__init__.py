@@ -45,6 +45,7 @@ class MyAdminIndexView(flask_admin.AdminIndexView):
 
 def create_app(config_name="default"):
     app = Flask(__name__)
+    app.config['UPLOAD_FOLDER'] = 'my_app/static/uploads'
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     mail.init_app(app)

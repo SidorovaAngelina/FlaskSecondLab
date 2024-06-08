@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4" style="color: #fc0fc0" >Профиль</h1>
+                    <form action="" method="post">
+                        {{ form.hidden_tag() }}
+                        <p></p>
+                        <div class="form-group">
+                            <label for="username">Имя пользователя:</label>
+                            {{ form.username(class="form-control") }}
+                            {% if form.username.errors %}
+                                <ul class="errors">
+                                    {% for error in form.username.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                        <p></p>
+                        <div class="form-group">
+                        <label for="email">Электронная почта:</label>
+                        <input type="email" class="form-control" id="email" value="{{ current_user.email }}" disabled>
+                    </div>
+                        <br>
+                        <button type="submit" class="btn btn-dark">Сохранить изменения</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

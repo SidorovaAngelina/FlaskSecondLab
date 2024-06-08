@@ -1,3 +1,4 @@
+<!-- index.html -->
 {% extends 'base.html'%}
 
 {% block title %}Домашняя страница{% endblock %}
@@ -14,17 +15,32 @@
     {% endwith %}
 
     {% if current_user.is_authenticated %}
-        <h3 style="padding-left: 15px;">Новости</h3>
-        <div class="article-list">
-            {% for article in article_list %}
-                <div class="article-card">
-                    <h4>{{ article.title }}</h4>
-                    <p>{{ article.text|truncate(100) }}</p>
+        <div style="display:flex; justify-content: center; margin-top: 20px;">
+            <h1 class="text-blue">
+                Кратко о музыкальной индустрии
+            </h1>
+        </div>
+        <hr>
+        <div class="row justify-content-start">
+            {% for article in articles %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ article.title }}</h5>
+                            {% if article.photo %}
+                                <img src="{{ url_for('static', filename='uploads/' + article.photo) }}" alt="Изображение статьи" class >
+                            {% endif %}
+                            <p class="card-text">{{ article.description }}</p>
+                        </div>
+                    </div>
                 </div>
+                {% if loop.index % 3 == 0 and loop.index != articles|length %}
+                    </div><div class="row justify-content-start">
+                {% endif %}
             {% endfor %}
         </div>
     {% else %}
-    <h3 style="padding-left: 15px;">Зарегистрируйтесь, чтобы просматривать содержимое сайта. Хорошего Вам дня!</h3>
+    <h3 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">Здесь отображаются новости об артистах. Зарегистрируйтесь или авторизируйтесь, чтобы просматривать статьи. Хорошего Вам дня!</h3>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
     $(function() { // setTimeout() function will be fired after page is loaded
@@ -36,4 +52,5 @@
     });
     </script>
   {% endif %}
+
 {% endblock %}

@@ -1,10 +1,8 @@
-from datetime import datetime
-from . import db, admin
+from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import login_manager
 from flask_login import UserMixin, AnonymousUserMixin
 from authlib.jose import JsonWebSignature, jwt
-from flask_admin.contrib.sqla import ModelView
 
 
 class Permission:

@@ -1,16 +1,22 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileAllowed
 from wtforms import *
+from wtforms import StringField
 from wtforms.validators import DataRequired
+
+from my_app.models import User
 
 
 class ArticlesForm(FlaskForm):
     title = StringField('Название', validators=[DataRequired()])
     description = TextAreaField('Описание', validators=[DataRequired()])
-#   photo = FileField('Изображение', validators=[FileAllowed(['1.mp4', 'avi', 'mov'])])
-    submit = SubmitField('Добавить')
+    photo = FileField('Фотография статьи', validators=[DataRequired()])
+#   submit = SubmitField('Добавить')
 
 
-class CommentForm(FlaskForm):
-    text = TextAreaField('Что думаете?', validators=[DataRequired()])
-    submit = SubmitField('Отправить!')
+class ProfileForm(FlaskForm):
+    username = StringField('Имя пользователя', validators=[DataRequired()])
+
+    def validate_username(self, field):
+        if User.query.filter_by(username=field.data).first():
+            raise ValidationError('Такое имя пользователя уже занято!')
+

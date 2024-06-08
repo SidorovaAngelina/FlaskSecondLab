@@ -1,5 +1,5 @@
 from flask import (
-    render_template, redirect, url_for, flash, request, session
+    render_template, redirect, url_for, flash, request
 )
 from flask_login import (
     login_user, logout_user, login_required, current_user
@@ -27,13 +27,15 @@ def before_request():
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Страница авторизации
+    """
     form = LoginForm()
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
         print(f"Email: {email}, Password: {password}")
         user = User.query.filter_by(email=form.email.data).first()
-        print(f"User found: {user}")
         if user is not None and user.password_verification(form.password.data):
             print("Password verification successful")
             login_user(user)

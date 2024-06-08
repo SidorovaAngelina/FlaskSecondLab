@@ -12,6 +12,8 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or 'jbat hkoa cieh xxlg'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     FLASK_ADMIN = 'testlinaan@mail.ru'
+    UPLOAD_FOLDER = 'my_app/static/uploads'
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
     @staticmethod
     def init_app(app):

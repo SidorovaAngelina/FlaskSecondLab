@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from my_app import create_app, db
+from my_app import create_app
 
 
 flask_app = create_app('default')
