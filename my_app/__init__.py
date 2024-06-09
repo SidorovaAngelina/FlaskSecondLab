@@ -48,15 +48,18 @@ def create_app(config_name="default"):
     app.config['UPLOAD_FOLDER'] = 'my_app/static/uploads'
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
+
     mail.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     oauth.init_app(app)
+
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint, config=config)
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
+
     admin = flask_admin.Admin(app, index_view=MyAdminIndexView())
     from my_app.models import User, Articles
     admin.add_view(MyModelView(User, db.session))

@@ -2,15 +2,43 @@ body {
     font-family: 'Oswald', sans-serif;
 }
 .text-blue {
-  color: #413897
+  color: #4D3886
 }
 .card img {
   width: 200px;
   height: 150px;
   object-fit: cover;
+  display: block;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.card {
+  max-width: 500px;
+  height: 300px;
+}
+
+.card-body {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.card-container {
+    margin-left: 10px;
+    margin-right: 10px;
 }
 .custom-navbar-color{
     background-color: #C8C2D6;
+}
+.centered {
+    text-align: center;
+}
+.pink {
+    color: #d4029f;
+}
+.large-caps {
+    font-size: 24px;
+    text-transform: uppercase;
 }
 .message_flash {
     position: fixed;

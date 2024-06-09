@@ -36,6 +36,8 @@
               {% if current_user.is_authenticated %}
                 {% if current_user.is_admin() %}
                     <a class="btn btn-ligh" style="display: inline-block; margin-right: 10px;" href="{{ url_for('main.create_article') }}">Добавить статью</a>
+                    <a class="btn btn-ligh" style="display: inline-block; margin-right: 10px;" href="{{ url_for('admin.index') }}">В админку</a>
+
                 {% endif %}
               {% endif %}
               {% if current_user.is_authenticated %}

@@ -18,7 +18,9 @@ from .. import mail
 @auth.before_app_request
 def before_request():
     """
-    Проверка подтверждения аккаунта перед каждым запросом.
+
+    Check if the user is confirmed before each request.
+    If the user is not confirmed, redirect them to the unconfirmed page.
     """
     if current_user.is_authenticated and not current_user.confirmed:
         if request.blueprint != 'auth' and request.endpoint != 'static':
@@ -28,16 +30,17 @@ def before_request():
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     """
-    Страница авторизации
+
+    The authorization page.
+    Processes the authorization form and authenticates the user.
+    If the user has entered the correct data, they will be logged in and redirected to the index page.
+    If the data is incorrect, an error message will be displayed.
+    :return: Authorization page or redirection to the index page
     """
     form = LoginForm()
     if form.validate_on_submit():
-        email = form.email.data
-        password = form.password.data
-        print(f"Email: {email}, Password: {password}")
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.password_verification(form.password.data):
-            print("Password verification successful")
             login_user(user)
             next = request.args.get("next")
             if next is None or not next.startswith("/"):
@@ -50,7 +53,12 @@ def login():
 @auth.route('/registration', methods=['GET', 'POST'])
 def registration():
     """
-    Страница регистрации
+
+    The registration page.
+    Processes the registration form and creates a new user.
+    If the form is valid, a new user is created and a confirmation email is sent.
+    If the form is not valid, an error message is displayed.
+    :return: Registration page or redirection to the index page
     """
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -72,8 +80,6 @@ def registration():
                 flash('Аккаунт с данной почтой уже существует.', 'email_error')
             elif "key 'username'" in str(e):
                 flash('Пользователь с таким именем уже существует', 'username_error')
-            db.session.rollback()
-            return redirect(url_for('auth.registration'))
     return render_template('registration.html', form=form)
 
 
@@ -81,7 +87,9 @@ def registration():
 @login_required
 def logout():
     """
-    Выход из аккаунта.
+
+    Log out of your account.
+    Logs out of the account and redirects to the index page.
     """
     logout_user()
     flash('Вы вышли из аккаунта.')
@@ -92,8 +100,13 @@ def logout():
 @login_required
 def confirm(token):
     """
-    Подтверждение аккаунта
-    Параметр token: токен подтверждения
+
+    Account confirmation.
+    Processes account confirmation and updates the user's confirmation status.
+    If the confirmation is successful, a welcome email is sent.
+    If the confirmation is not successful, an error message is displayed.
+    :param token: Confirmation
+    token :return: Redirection to the index page
     """
     if current_user.confirmed:
         return redirect(url_for('main.index'))
@@ -110,7 +123,9 @@ def confirm(token):
 @auth.route('/unconfirmed')
 def unconfirmed():
     """
-    Для не подтвержденных аккаунтов.
+
+    A page for unconfirmed accounts.
+    Displays a page for users who have not verified their account.
     """
     if current_user.is_anonymous or current_user.confirmed:
         return redirect(url_for('main.index'))
@@ -119,9 +134,11 @@ def unconfirmed():
 
 def send_confirm(new_user, token):
     """
-    Отправка письма с подтверждением аккаунта.
-    :param new_user: новый пользователь
-    :param token: токен подтверждения
+
+    Send a confirmation email to a new user.
+    :param new_user: The new user object
+    :param token: The confirmation token
+    :return: A redirect to the main index page
     """
     send_mail(new_user.email, 'Confirm your account', 'confirm', new_user=new_user, token=token)
     return redirect(url_for('main.index'))
@@ -129,11 +146,13 @@ def send_confirm(new_user, token):
 
 def send_mail(to, subject, template, **kwargs):
     """
-    Отправка электронного письма.
-    :param to: адрес получателя
-    :param subject: тема письма
-    :param template: шаблон письма
-    :param kwargs: дополнительные параметры
+
+    Sending an email to a user.
+    :param to: The recipient's email address
+    :param subject: The email subject
+    :param template: The email template
+    :param kwargs: Additional keyword arguments for the email template
+    :return: A thread object that sends the email asynchronously
     """
     msg = Message(subject,
                   sender='testkaze01@gmail.com',
@@ -151,9 +170,11 @@ def send_mail(to, subject, template, **kwargs):
 
 def send_async_email(app, msg):
     """
-    Отправка электронного письма асинхронно
-    :param app: приложение Flask
-    :param msg: объект Message
+
+    Send an email asynchronously.
+    :param app: The Flask app object
+    :param msg: The email message object
+    :return: None
     """
     with app.app_context():
         mail.send(msg)
