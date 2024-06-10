@@ -119,6 +119,21 @@ class User(UserMixin, db.Model):
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
 
+    def confirm(self, token):
+        try:
+            data = jwt.decode(token, 'secret')
+            if data['sub'] != str(self.id):
+                print('It`s not your token')
+                return False
+            else:
+                self.confirmed = True
+                db.session.add(self)
+                db.session.commit()
+                return True
+        except jwt.DecodeError:
+            print('Invalid token')
+            return False
+
     def password_verification(self, password):
         return check_password_hash(self.password_hash, password)
 

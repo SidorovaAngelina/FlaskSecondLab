@@ -61,8 +61,9 @@ def create_app(config_name="default"):
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
     admin = flask_admin.Admin(app, index_view=MyAdminIndexView())
-    from my_app.models import User, Articles
+    from my_app.models import User, Articles, Comment
     admin.add_view(MyModelView(User, db.session))
     admin.add_view(MyModelView(Articles, db.session))
+    admin.add_view(MyModelView(Comment, db.session))
 
     return app
